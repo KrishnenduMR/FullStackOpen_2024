@@ -1,0 +1,11 @@
+0.5
+
+Browser -> Server : HTTP GET https://studies.cs.helsinki.fi/exampleapp/spa
+|
+Browser -> Server : HTTP GET https://studies.cs.helsinki.fi/exampleapp/spa.js
+|
+Browser -> Server : HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.css
+|
+Browser -> Server : HTTP GET https://studies.cs.helsinki.fi/exampleapp/data.json
+|
+Browser executes the event handler that renders notes to display using DOM-API

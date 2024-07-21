@@ -1,0 +1,7 @@
+0.6
+
+POST request to the address new_note_spa contains new note as JSON_data containing both the content of the note and timestamp
+|
+Browser -> Server : HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+|
+Server -> Browser : STATUS CODE 201

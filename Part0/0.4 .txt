@@ -1,0 +1,19 @@
+0.4 
+
+Browser -> Server : HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note
+|
+Server requests new HTTP GET Location: //notes with URL redirect
+|
+Server -> Browser : HTTP STATUS CODE 302
+|
+Browser -> Server : HTTP GET https://studies.cs.helsinki.fi/exampleapp/notes
+|
+Browser -> Server : HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.js
+|
+Browser -> Server : HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.css
+|
+Browser starts executing js-code that requests JSON data from server
+|
+Browser -> Server : HTTP GET https://studies.cs.helsinki.fi/exampleapp/data.json
+|
+Browser executes the event handler that renders notes to display
