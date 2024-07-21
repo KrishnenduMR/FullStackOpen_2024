@@ -3,9 +3,9 @@ import React from 'react';
 const Result = (props) => {
 
     return (
-        <div>
-            <p>{props.button} {props.clicks} </p>
-        </div>
+        <tr>
+            <td>{props.button}</td><td>{props.clicks} </td>
+        </tr>
     );
 };
 

@@ -29,13 +29,14 @@ const App = () => {
       <Button onClick={handleNeutralclick} text="neutral" />
       <Button onClick={handleBadclick} text="bad" />
       <h1>statistics</h1>
-      {feedback_given ? (<div>
+      {feedback_given ? (<div><table><tbody>
         <Result button="good" clicks={good} />
         <Result button="neutral" clicks={neutral} />
         <Result button="bad" clicks={bad} />
         <Result button="Total" clicks={bad + neutral + good} />
         <Result button="Avg" clicks={(good - bad) / (good + bad + neutral)} />
-        <Result button="Positive" clicks={(good) / (good + bad + neutral)} /> </div>
+        <Result button="Positive" clicks={(good) / (good + bad + neutral)} />
+      </tbody> </table> </div>
       ) : (<p>no feedback given</p>)}
     </div>
   )
