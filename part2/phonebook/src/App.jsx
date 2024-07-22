@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Filter from './Filter';
 import Form from './Form';
 import Numbers from './Numbers';
+import axios from 'axios'
 
 const App = () => {
     const [persons, setPersons] = useState([]);
@@ -25,7 +26,7 @@ const App = () => {
         event.preventDefault();
         const new_person = {
             name: newName,
-            phone: newNo
+            number: newNo
         };
         if ((newName === '') || JSON.stringify(persons).includes(JSON.stringify(new_person)) || newNo === '0') {
             alert(`${newName} and ${newNo} has already added to phonebook or contains no characters`);
@@ -37,6 +38,14 @@ const App = () => {
         setNewName('');
         setNewNo(0);
     };
+
+    useEffect(() => {
+        axios
+            .get('http://localhost:3001/persons')
+            .then(response => {
+                setPersons(response.data)
+            })
+    }, [])
 
     return (
         <div>
