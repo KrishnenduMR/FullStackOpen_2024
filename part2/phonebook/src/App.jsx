@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import Filter from './Filter';
-import Form from './Form';
-import Numbers from './Numbers';
+import Filter from './components/Filter';
+import Form from './components/Form';
+import Numbers from './components/Numbers';
 import servercalls from './servercalls';
+import Error from './components/Error';
+import Success from './components/Success';
 
 const App = () => {
     const [persons, setPersons] = useState([]);
     const [newName, setNewName] = useState('');
     const [newNo, setNewNo] = useState('0');
     const [newFilter, setNewFilter] = useState('');
+    const [newError, setError] = useState('');
+    const [newSuccess, setSuccess] = useState('');
 
     const handlechangeName = (event) => {
         setNewName(event.target.value);
@@ -24,15 +28,13 @@ const App = () => {
 
     const handlesubmit = async (event) => {
         event.preventDefault();
-        const new_person = {
-            name: newName,
-            number: newNo
-        };
+        const new_person = { name: newName, number: newNo };
 
         if (newName === '' || newNo === '0') {
-            alert(`Name or number cannot be empty.`);
+            setError('Name or Number cannot be empty.');
             setNewName('');
             setNewNo('');
+            setTimeout(() => setError(''), 5000);
             return;
         }
 
@@ -42,20 +44,24 @@ const App = () => {
                 try {
                     const updatedPerson = await servercalls.update(existingPerson.id, new_person);
                     setPersons(persons.map(person => person.id === existingPerson.id ? updatedPerson : person));
-                    alert(`${newName}'s number has been updated.`);
+                    setSuccess(`${newName}'s number has been updated.`);
+                    setTimeout(() => setSuccess(''), 5000);
                 } catch (error) {
                     console.error('Error updating person:', error);
-                    alert('Error updating person.');
+                    setError('Error updating person.');
+                    setTimeout(() => setError(''), 5000);
                 }
             }
         } else {
             try {
                 const createdPerson = await servercalls.create(new_person);
                 setPersons(persons.concat(createdPerson));
-                alert(`${newName} has been added to the phonebook.`);
+                setSuccess(`${newName} has been added to the phonebook.`);
+                setTimeout(() => setSuccess(''), 5000);
             } catch (error) {
                 console.error('Error adding person:', error);
-                alert('Error adding person.');
+                setError('Error adding person.');
+                setTimeout(() => setError(''), 5000);
             }
         }
 
@@ -67,34 +73,36 @@ const App = () => {
         const existingPerson = persons.find(person => person.name.toLowerCase() === name.toLowerCase());
         if (existingPerson) {
             if (window.confirm(`Are you sure you want to delete ${name}?`)) {
-                await servercalls.remove(existingPerson.id)
-                    .then(() => {
-                        setPersons(persons.filter(person => person.id !== existingPerson.id));
-                        alert(`${name} has been deleted.`);
-                    })
-                    .catch(error => {
-                        console.error('Error deleting person:', error);
-                        alert('Error deleting person.');
-                    });
+                try {
+                    await servercalls.remove(existingPerson.id);
+                    setPersons(persons.filter(person => person.id !== existingPerson.id));
+                    setSuccess(`${name} has been deleted.`);
+                    setTimeout(() => setSuccess(''), 5000);
+                } catch (error) {
+                    console.error('Error deleting person:', error);
+                    setError('Error deleting person.');
+                    setTimeout(() => setError(''), 5000);
+                }
             }
         } else {
-            alert(`${name} not found in the phonebook.`);
+            setError(`${name} not found in the phonebook.`);
+            setTimeout(() => setError(''), 5000);
         }
     };
 
     useEffect(() => {
-        servercalls
-            .getAll()
-            .then(initialnumbers => {
-                setPersons(initialnumbers)
-            })
-    }, [])
+        servercalls.getAll().then(initialnumbers => {
+            setPersons(initialnumbers);
+        });
+    }, []);
 
     return (
         <div>
             <h2>Phonebook</h2>
+            {newError && <Error text={newError} />}
+            {newSuccess && <Success text={newSuccess} />}
             <Filter newFilter={newFilter} handleChangeFilter={handleChangeFilter} />
-            <h2>add a new</h2>
+            <h2>Add a new</h2>
             <Form
                 newName={newName}
                 newNo={newNo}
