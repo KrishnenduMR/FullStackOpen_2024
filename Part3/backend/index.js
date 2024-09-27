@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid'); // Import UUID for unique ID generation
 
 const app = express();
 const port = process.env.PORT || 3001;
-
+app.use(express.static('dist'))
 app.use(cors()); // Enable CORS
 app.use(express.json()); // Middleware to parse JSON bodies
 
