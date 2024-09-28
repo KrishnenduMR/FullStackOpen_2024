@@ -1,5 +1,5 @@
 const express = require('express');
-const Person = require('./mongo')
+const Person = require('./mongo');
 require('dotenv').config();
 var morgan = require('morgan');
 const cors = require('cors');  // Import CORS
@@ -21,7 +21,6 @@ morgan.token('query', (req) => {
 const morganFormat = ':method :url :status :res[content-length] - :response-time ms - Query: :query - Body: :body';
 app.use(morgan(morganFormat)); // Log incoming data
 
-
 // Error handling middleware
 const errorHandler = (err, req, res, next) => {
     console.error(err.message); // Log the error message
@@ -42,20 +41,18 @@ app.get('/api/persons', (req, res, next) => {
         .catch(err => next(err)); // Pass error to next middleware
 });
 
-app.get('/info', (req, res) => {
+app.get('/info', (req, res, next) => { // Add next here
     const date = new Date().toLocaleString(); // Get the current date and time
         
     // Use Mongoose to count the number of documents
     Person.countDocuments()
         .then(count => {
-                res.send(`<p>Phonebook has info for ${count} people</p><p>${date}</p>`);
-            })
-            .catch(err => next(err)); // Pass error to next middleware
-        });
-        
+            res.send(`<p>Phonebook has info for ${count} people</p><p>${date}</p>`);
+        })
+        .catch(err => next(err)); // Pass error to next middleware
+});
 
-
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => { // Add next here
     const id = req.params.id; // Get the ID from the request parameters
 
     // Use Mongoose to find the person by ID
@@ -70,8 +67,7 @@ app.get('/api/persons/:id', (req, res) => {
         .catch(err => next(err)); // Pass error to next middleware
 });
 
-
-app.delete('/api/persons/:id', (req, res) => {
+app.delete('/api/persons/:id', (req, res, next) => { // Add next here
     const id = req.params.id; // Get the ID from the request parameters
 
     Person.findByIdAndDelete(id)
@@ -84,8 +80,7 @@ app.delete('/api/persons/:id', (req, res) => {
         .catch(err => next(err)); // Pass error to next middleware
 });
 
-
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => { // Add next here
     console.log('Received body:', req.body); // Log incoming data for debugging
 
     const person = req.body;
@@ -114,7 +109,7 @@ app.post('/api/persons', (req, res) => {
         .catch(err => next(err)); // Pass error to next middleware
 });
 
-app.put('/api/persons/:id', (req, res) => {
+app.put('/api/persons/:id', (req, res, next) => { // Add next here
     const id = req.params.id; // Get the ID from the request parameters
     const updatedData = req.body; // Get the updated data from the request body
 
@@ -134,7 +129,6 @@ app.put('/api/persons/:id', (req, res) => {
         })
         .catch(err => next(err)); // Pass error to next middleware
 });
-
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
