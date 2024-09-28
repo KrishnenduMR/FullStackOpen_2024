@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
-const dotenv = require('dotenv');
-dotenv.config(); 
+const dotenv = require('dotenv')
+dotenv.config()
 
-const url = process.env.MONGODB_URI;
+const url = process.env.MONGODB_URI
 
 mongoose.set('strictQuery',false)
 
@@ -24,7 +24,7 @@ const personSchema = new mongoose.Schema({
   number: {
     type: String,
     minLength: 8,
-    content: /[0-9]+-[0-9]+/g, 
+    content: /[0-9]+-[0-9]+/g,
     required: true
   }
 })
@@ -39,4 +39,4 @@ personSchema.set('toJSON', {
   }
 })
 
-module.exports = Person;
+module.exports = Person
