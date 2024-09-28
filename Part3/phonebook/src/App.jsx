@@ -47,8 +47,8 @@ const App = () => {
                     setSuccess(`${newName}'s number has been updated.`);
                     setTimeout(() => setSuccess(''), 5000);
                 } catch (error) {
-                    console.error('Error updating person:', error.response ? error.response.data : error.message);
-                    setError(`Error updating person: ${error.response ? error.response.data : error.message}`);
+                    console.error('Error updating person:', error.message);
+                    setError(`Error updating person: ${error.message}`);
                     setTimeout(() => setError(''), 5000);
                 }
             }
@@ -59,8 +59,8 @@ const App = () => {
                 setSuccess(`${newName} has been added to the phonebook.`);
                 setTimeout(() => setSuccess(''), 5000);
             } catch (error) {
-                console.error('Error adding person:', error.response ? error.response.data : error.message);
-                setError(`Error adding person: ${error.response ? error.response.data : error.message}`);
+                console.error('Error adding person:', error.message);
+                setError(`Error adding person: ${error.message}`);
                 setTimeout(() => setError(''), 5000);
             }
         }
@@ -80,8 +80,8 @@ const App = () => {
                     setSuccess(`${name} has been deleted.`);
                     setTimeout(() => setSuccess(''), 5000);
                 } catch (error) {
-                    console.error('Error deleting person:', error);
-                    setError(`Error deleting person: ${error.response ? error.response.data : error.message}`);
+                    console.error('Error deleting person:', );
+                    setError(`Error deleting person: ${error.message}`);
                     setTimeout(() => setError(''), 5000);
                 }
             }
