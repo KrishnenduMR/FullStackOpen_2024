@@ -40,7 +40,7 @@ const App = () => {
         }
     
         const existingPerson = persons.find(person => person.name.toLowerCase() === newName.toLowerCase());
-        
+    
         if (existingPerson) {
             if (window.confirm(`${newName} already exists. Do you want to update the number?`)) {
                 try {
@@ -49,7 +49,7 @@ const App = () => {
                     setSuccess(`${newName}'s number has been updated.`);
                     setTimeout(() => setSuccess(''), 5000);
                 } catch (error) {
-                    const errorMessage = error.response.data.error
+                    const errorMessage = error.response?.data?.error || 'An error occurred while updating the person.';
                     setError(`Error updating person: ${errorMessage}`);
                     setTimeout(() => setError(''), 5000);
                 }
@@ -61,7 +61,7 @@ const App = () => {
                 setSuccess(`${newName} has been added to the phonebook.`);
                 setTimeout(() => setSuccess(''), 5000);
             } catch (error) {
-                const errorMessage = error.response.data.error
+                const errorMessage = error.response?.data?.error || 'An error occurred while adding the person.';
                 setError(`Error adding person: ${errorMessage}`);
                 setTimeout(() => setError(''), 5000);
             }
@@ -69,12 +69,11 @@ const App = () => {
     
         setNewName('');
         setNewNo('');
-    };
-    
+    };  
 
     const handledelete = async (name) => {
         const existingPerson = persons.find(person => person.name.toLowerCase() === name.toLowerCase());
-        
+    
         if (existingPerson) {
             if (window.confirm(`Are you sure you want to delete ${name}?`)) {
                 try {
@@ -83,10 +82,8 @@ const App = () => {
                     setSuccess(`${name} has been deleted.`);
                     setTimeout(() => setSuccess(''), 5000);
                 } catch (error) {
-                    // Extracting the error message
-                    const errorMessage = error.response.data.error || 'An unexpected error occurred.';
-                    
-                    setError(`Error deleting person: ${errorMessage}`); // Display the relevant error message
+                    const errorMessage = error.response?.data?.error || 'An error occurred while deleting the person.';
+                    setError(`Error deleting person: ${errorMessage}`);
                     setTimeout(() => setError(''), 5000);
                 }
             }
@@ -94,8 +91,7 @@ const App = () => {
             setError(`${name} not found in the phonebook.`);
             setTimeout(() => setError(''), 5000);
         }
-    };
-    
+    };    
 
     useEffect(() => {
         servercalls.getAll().then(initialnumbers => {
