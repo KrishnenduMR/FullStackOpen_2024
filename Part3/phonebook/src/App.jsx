@@ -49,10 +49,7 @@ const App = () => {
                     setSuccess(`${newName}'s number has been updated.`);
                     setTimeout(() => setSuccess(''), 5000);
                 } catch (error) {
-                    console.error('Error updating person:', error);
-                    const errorMessage = error.response && error.response.data.error 
-                        ? error.response.data.error 
-                        : error.message;
+                    const errorMessage = error.response.data.error
                     setError(`Error updating person: ${errorMessage}`);
                     setTimeout(() => setError(''), 5000);
                 }
@@ -64,10 +61,7 @@ const App = () => {
                 setSuccess(`${newName} has been added to the phonebook.`);
                 setTimeout(() => setSuccess(''), 5000);
             } catch (error) {
-                console.error('Error adding person:', error);
-                const errorMessage = error.response && error.response.data.error 
-                    ? error.response.data.error 
-                    : error.message;
+                const errorMessage = error.response.data.error
                 setError(`Error adding person: ${errorMessage}`);
                 setTimeout(() => setError(''), 5000);
             }
@@ -89,10 +83,8 @@ const App = () => {
                     setSuccess(`${name} has been deleted.`);
                     setTimeout(() => setSuccess(''), 5000);
                 } catch (error) {
-                    console.error('Error deleting person:', error); // Log the full error for debugging
-                    
                     // Extracting the error message
-                    const errorMessage = error.response?.data?.error || 'An unexpected error occurred.';
+                    const errorMessage = error.response.data.error || 'An unexpected error occurred.';
                     
                     setError(`Error deleting person: ${errorMessage}`); // Display the relevant error message
                     setTimeout(() => setError(''), 5000);
