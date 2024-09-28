@@ -48,7 +48,7 @@ const App = () => {
                     setTimeout(() => setSuccess(''), 5000);
                 } catch (error) {
                     console.error('Error updating person:', error.response ? error.response.data : error.message);
-                    setError('Error updating person.');
+                    setError(`Error updating person: ${error.response ? error.response.data : error.message}`);
                     setTimeout(() => setError(''), 5000);
                 }
             }
@@ -60,7 +60,7 @@ const App = () => {
                 setTimeout(() => setSuccess(''), 5000);
             } catch (error) {
                 console.error('Error adding person:', error.response ? error.response.data : error.message);
-                setError('Error adding person.');
+                setError(`Error adding person: ${error.response ? error.response.data : error.message}`);
                 setTimeout(() => setError(''), 5000);
             }
         }
@@ -81,7 +81,7 @@ const App = () => {
                     setTimeout(() => setSuccess(''), 5000);
                 } catch (error) {
                     console.error('Error deleting person:', error);
-                    setError('Error deleting person.');
+                    setError(`Error deleting person: ${error.response ? error.response.data : error.message}`);
                     setTimeout(() => setError(''), 5000);
                 }
             }
