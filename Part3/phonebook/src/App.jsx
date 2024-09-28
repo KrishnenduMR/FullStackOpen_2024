@@ -30,6 +30,7 @@ const App = () => {
         event.preventDefault();
         const new_person = { name: newName, number: newNo };
     
+        // Check for empty fields
         if (newName === '' || newNo === '0') {
             setError('Name or Number cannot be empty.');
             setNewName('');
@@ -39,6 +40,7 @@ const App = () => {
         }
     
         const existingPerson = persons.find(person => person.name.toLowerCase() === newName.toLowerCase());
+        
         if (existingPerson) {
             if (window.confirm(`${newName} already exists. Do you want to update the number?`)) {
                 try {
@@ -47,8 +49,11 @@ const App = () => {
                     setSuccess(`${newName}'s number has been updated.`);
                     setTimeout(() => setSuccess(''), 5000);
                 } catch (error) {
-                    console.error('Error updating person:', error.message);
-                    setError(`Error updating person: ${error.message}`);
+                    console.error('Error updating person:', error);
+                    const errorMessage = error.response && error.response.data.error 
+                        ? error.response.data.error 
+                        : error.message;
+                    setError(`Error updating person: ${errorMessage}`);
                     setTimeout(() => setError(''), 5000);
                 }
             }
@@ -59,8 +64,11 @@ const App = () => {
                 setSuccess(`${newName} has been added to the phonebook.`);
                 setTimeout(() => setSuccess(''), 5000);
             } catch (error) {
-                console.error('Error adding person:', error.message);
-                setError(`Error adding person: ${error.message}`);
+                console.error('Error adding person:', error);
+                const errorMessage = error.response && error.response.data.error 
+                    ? error.response.data.error 
+                    : error.message;
+                setError(`Error adding person: ${errorMessage}`);
                 setTimeout(() => setError(''), 5000);
             }
         }
@@ -72,6 +80,7 @@ const App = () => {
 
     const handledelete = async (name) => {
         const existingPerson = persons.find(person => person.name.toLowerCase() === name.toLowerCase());
+        
         if (existingPerson) {
             if (window.confirm(`Are you sure you want to delete ${name}?`)) {
                 try {
@@ -80,8 +89,12 @@ const App = () => {
                     setSuccess(`${name} has been deleted.`);
                     setTimeout(() => setSuccess(''), 5000);
                 } catch (error) {
-                    console.error('Error deleting person:', );
-                    setError(`Error deleting person: ${error.message}`);
+                    console.error('Error deleting person:', error); // Log the full error for debugging
+                    
+                    // Extracting the error message
+                    const errorMessage = error.response?.data?.error || 'An unexpected error occurred.';
+                    
+                    setError(`Error deleting person: ${errorMessage}`); // Display the relevant error message
                     setTimeout(() => setError(''), 5000);
                 }
             }
@@ -90,6 +103,7 @@ const App = () => {
             setTimeout(() => setError(''), 5000);
         }
     };
+    
 
     useEffect(() => {
         servercalls.getAll().then(initialnumbers => {

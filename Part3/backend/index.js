@@ -22,19 +22,20 @@ const morganFormat = ':method :url :status :res[content-length] - :response-time
 app.use(morgan(morganFormat)); // Log incoming data
 
 const errorHandler = (err, req, res, next) => {
+    console.error(err);
 
     if (err.name === 'ValidationError') {
         const validationErrors = Object.values(err.errors).map(error => error.message);
-        // Join into a single string for the response
         return res.status(400).json({ error: validationErrors.join(', ') });
     }
 
     if (err.name === 'CastError') {
         return res.status(400).json({ error: 'Invalid ID format' });
     }
-    // Handle other errors generically
+
     res.status(500).json({ error: 'Internal Server Error' });
 };
+
 
 // Register the error handling middleware
 app.use(errorHandler);
