@@ -21,19 +21,24 @@ morgan.token('query', (req) => {
 const morganFormat = ':method :url :status :res[content-length] - :response-time ms - Query: :query - Body: :body';
 app.use(morgan(morganFormat)); // Log incoming data
 
-// Error handling middleware
 const errorHandler = (err, req, res, next) => {
-    console.error(err.message); // Log the error message
+
     if (err.name === 'ValidationError') {
-        return res.status(400).json({ error: err.message }); // Handle validation errors
+        const validationErrors = Object.values(err.errors).map(error => error.message);
+        // Join into a single string for the response
+        return res.status(400).json({ error: validationErrors.join(', ') });
     }
+
     if (err.name === 'CastError') {
-        return res.status(400).json({ error: 'Invalid ID format' }); // Handle invalid ID format errors
+        return res.status(400).json({ error: 'Invalid ID format' });
     }
-    res.status(500).json({ error: 'Internal Server Error' }); // Handle other errors
+    // Handle other errors generically
+    res.status(500).json({ error: 'Internal Server Error' });
 };
 
-app.use(errorHandler); // Register the error handling middleware
+// Register the error handling middleware
+app.use(errorHandler);
+
 
 app.get('/api/persons', (req, res, next) => {
     Person.find({})
