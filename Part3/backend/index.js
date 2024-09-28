@@ -1,17 +1,18 @@
 const express = require('express');
 const Person = require('./mongo');
 require('dotenv').config();
-var morgan = require('morgan');
-const cors = require('cors');  // Import CORS
+const morgan = require('morgan');
+const cors = require('cors'); 
 
 const app = express();
 const port = process.env.PORT || 3001;
-app.use(express.static('dist'))
-app.use(cors()); // Enable CORS
-app.use(express.json()); // Middleware to parse JSON bodies
+
+app.use(express.static('dist'));
+app.use(cors()); 
+app.use(express.json()); 
 
 morgan.token('body', (req) => {
-   return Object.keys(req.body).length ? JSON.stringify(req.body) : '';
+    return Object.keys(req.body).length ? JSON.stringify(req.body) : '';
 });
 
 morgan.token('query', (req) => {
@@ -19,62 +20,54 @@ morgan.token('query', (req) => {
 });
 
 const morganFormat = ':method :url :status :res[content-length] - :response-time ms - Query: :query - Body: :body';
-app.use(morgan(morganFormat)); // Log incoming data
+app.use(morgan(morganFormat)); 
 
-const errorHandler = (err, req, res, next) => {
-    console.error(err);
-
-    if (err.name === 'ValidationError') {
-        const validationErrors = Object.values(err.errors).map(error => error.message);
-        return res.status(400).json({ error: validationErrors.join(', ') });
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message);
+    
+    if (error.name === 'CastError') {
+        return response.status(400).send({ error: 'malformatted id' })
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({ error: error.message })
     }
-
-    if (err.name === 'CastError') {
-        return res.status(400).json({ error: 'Invalid ID format' });
-    }
-
-    res.status(500).json({ error: 'Internal Server Error' });
+    
+    next(error);
 };
 
-
-// Register the error handling middleware
 app.use(errorHandler);
-
 
 app.get('/api/persons', (req, res, next) => {
     Person.find({})
         .then(persons => res.json(persons))
-        .catch(err => next(err)); // Pass error to next middleware
+        .catch(err => next(err));
 });
 
-app.get('/info', (req, res, next) => { // Add next here
-    const date = new Date().toLocaleString(); // Get the current date and time
-        
-    // Use Mongoose to count the number of documents
+app.get('/info', (req, res, next) => {
+    const date = new Date().toLocaleString();
+    
     Person.countDocuments()
         .then(count => {
             res.send(`<p>Phonebook has info for ${count} people</p><p>${date}</p>`);
         })
-        .catch(err => next(err)); // Pass error to next middleware
+        .catch(err => next(err));
 });
 
-app.get('/api/persons/:id', (req, res, next) => { // Add next here
-    const id = req.params.id; // Get the ID from the request parameters
+app.get('/api/persons/:id', (req, res, next) => {
+    const id = req.params.id;
 
-    // Use Mongoose to find the person by ID
     Person.findById(id)
         .then(person => {
             if (person) {
-                res.json(person); // Return the found person
+                res.json(person);
             } else {
-                res.status(404).send('Person not found'); // Handle case where person doesn't exist
+                res.status(404).send('Person not found');
             }
         })
-        .catch(err => next(err)); // Pass error to next middleware
+        .catch(err => next(err));
 });
 
-app.delete('/api/persons/:id', (req, res, next) => { // Add next here
-    const id = req.params.id; // Get the ID from the request parameters
+app.delete('/api/persons/:id', (req, res, next) => {
+    const id = req.params.id;
 
     Person.findByIdAndDelete(id)
         .then(deletedPerson => {
@@ -83,57 +76,50 @@ app.delete('/api/persons/:id', (req, res, next) => { // Add next here
             }
             res.json({ message: 'Person deleted', deletedPerson });
         })
-        .catch(err => next(err)); // Pass error to next middleware
+        .catch(err => next(err));
 });
 
-app.post('/api/persons', (req, res, next) => { // Add next here
-    console.log('Received body:', req.body); // Log incoming data for debugging
+app.post('/api/persons', (req, res, next) => {
+    console.log('Received body:', req.body);
 
-    const person = req.body;
-    if (!person.name || !person.number) {
+    const { name, number } = req.body;
+    if (!name || !number) {
         return res.status(400).json({ error: 'content missing' });
     }
-    Person.findOne({ name: person.name })
+
+    Person.findOne({ name })
         .then(existingPerson => {
             if (existingPerson) {
                 return res.status(400).json({ error: 'name must be unique' });
             }
 
-            // Create a new person
-            const p = new Person({
-                name: person.name,
-                number: person.number,
-            });
-
-            // Save the new person
-            return p.save();
+            const person = new Person({ name, number });
+            return person.save();
         })
         .then(savedPerson => {
-            res.json(savedPerson); // Send the saved person in the response
+            res.json(savedPerson);
             console.log('Person saved!', savedPerson);
         })
-        .catch(err => next(err)); // Pass error to next middleware
+        .catch(err => next(err));
 });
 
-app.put('/api/persons/:id', (req, res, next) => { // Add next here
-    const id = req.params.id; // Get the ID from the request parameters
-    const updatedData = req.body; // Get the updated data from the request body
+app.put('/api/persons/:id', (req, res, next) => {
+    const id = req.params.id;
+    const updatedData = req.body;
 
-    // Validate required fields (you can customize this validation)
     if (!updatedData.name || !updatedData.number) {
         return res.status(400).json({ error: 'content missing' });
     }
 
-    // Use Mongoose to find and update the person by ID
-    Person.findByIdAndUpdate(id, updatedData, { new: true, runValidators: true }) // Options: new: return the modified document
+    Person.findByIdAndUpdate(id, updatedData, { new: true, runValidators: true })
         .then(updatedPerson => {
             if (updatedPerson) {
-                res.json(updatedPerson); // Return the updated person
+                res.json(updatedPerson);
             } else {
-                res.status(404).json({ error: 'Person not found' }); // Handle case where person doesn't exist
+                res.status(404).json({ error: 'Person not found' });
             }
         })
-        .catch(err => next(err)); // Pass error to next middleware
+        .catch(err => next(err));
 });
 
 app.listen(port, () => {
