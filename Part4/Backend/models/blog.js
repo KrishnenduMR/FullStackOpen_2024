@@ -11,17 +11,20 @@ const blogSchema = new mongoose.Schema({
     required: true,
   },
   url: {
-        type: String,
-        required: true,
-        validator: function(v) {
-            return /^(http|https):\/\/[^ "]+$/.test(v);
-        },
-    },
+    type: String,
+    required: true,
+    validate: {
+      validator: function(v) {
+          return /^(http|https):\/\/[^\s/$.?#].[^\s]*$/.test(v); // URL validation regex
+      },
+      message: props => `${props.value} is not a valid URL!`
+    }
+  },
   likes : {
     type: Number,
     default: 0,
     validator: function(v) {
-        return v >= 0 && /[0-9]+/.test(v.toString());
+      return /^[0-9]+$/.test(v)
     },
   }
 

@@ -1,26 +1,21 @@
-import React from 'react'
-import { useState } from 'react'
+import React, { lazy, Suspense } from "react"
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom"
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Blog from './components/Blog'
-import {Error, Success} from './components/alert'
-//import Navbar from './components/Navbar'
-//import Footer from './components/Footer'
-import Add from './components/Add'
-function App() {
-  
-  const[updateBlog, setupdateBlog] = useState(null);
-  const[error, seterror] = useState(null);
-  const[success, setsuccess] = useState(null);
+const BlogList = lazy(() => import("./pages/BlogList"))
+const Home = lazy(() => import("./pages/Home"))
+const Loading = lazy(() => import("./components/Loading"))
+
+function App() { 
   return (
-    <>
-      {error && <Error message={error} />}
-      {success && <Success message={success} />}
-      <div className="container mt-4">
-        <h1 className="text-center mb-4">Blog Lists</h1>
-        <Blog setupdateBlog={setupdateBlog} seterror={seterror} setsuccess={setsuccess} />
-        <Add updateBlog={updateBlog} seterror={seterror} setsuccess={setsuccess} />
-      </div>
-    </>
+    <Suspense fallback={<Loading />}>
+      <Router>
+        {/* navbar */}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/bloglist" element={<BlogList />} />
+        </Routes>
+      </Router>
+    </Suspense>
   )
 }
 
