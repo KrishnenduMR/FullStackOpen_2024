@@ -1,40 +1,32 @@
+require('express-async-errors')
 const BlogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 
-BlogsRouter.get('/', (req, res, next) => {
-  Blog.find({})
-    .then(blogs => res.json(blogs))
-    .catch(err => next(err))
+BlogsRouter.get('/', async (req, res) => {
+  const blogs = await Blog.find({})
+  res.json(blogs)
 })
 
-BlogsRouter.get('/:id', (req, res, next) => {
+BlogsRouter.get('/:id', async (req, res) => {
   const id = req.params.id
-
-  Blog.findById(id)
-    .then(blog => {
-      if (blog) {
-        res.json(blog)
-      } else {
-        res.status(404).send('Blog not found')
-      }
-    })
-    .catch(err => next(err))
+  const blog = await Blog.findById(id)
+  if (blog) {
+    res.json(blog)
+  } else {
+    res.status(400).send('Blog not found')
+  }
 })
 
-BlogsRouter.delete('/:id', (req, res, next) => {
+BlogsRouter.delete('/:id', async (req, res) => {
   const id = req.params.id
-
-  Blog.findByIdAndDelete(id)
-    .then(deletedBlog => {
-      if (!deletedBlog) {
-        return res.status(404).json({ error: 'Blog not found' })
-      }
-      res.json({ message: 'Blog deleted', deletedBlog })
-    })
-    .catch(err => next(err))
+  const deletedBlog = await Blog.findByIdAndDelete(id)
+  if (!deletedBlog) {
+    return res.status(404).json({ error: 'Blog not found' })
+  }
+  res.status(204).json({ message: 'Blog deleted', deletedBlog })
 })
 
-BlogsRouter.post('/', (req, res, next) => {
+BlogsRouter.post('/', async (req, res) => {
   console.log('Received body:', req.body)
 
   const { title, author, url, likes } = req.body
@@ -42,23 +34,22 @@ BlogsRouter.post('/', (req, res, next) => {
     return res.status(400).json({ error: 'Content missing' })
   }
 
-  Blog.findOne({ title })
-    .then(existingBlog => {
-      if (existingBlog) {
-        return res.status(400).json({ error: 'Title must be unique' })
-      }
+  if(!likes) {
+    req.body.likes = 0
+  }
 
-      const blog = new Blog({ title, author, url, likes })
-      return blog.save()
-    })
-    .then(savedBlog => {
-      res.json(savedBlog)
-      console.log('Blog saved!', savedBlog)
-    })
-    .catch(err => next(err))
+  const existingBlog = await Blog.findOne({ title })
+  if (existingBlog) {
+    return res.status(400).json({ error: 'Title must be unique' })
+  }
+
+  const blog = new Blog({ title, author, url, likes })
+  const savedBlog = await blog.save()
+  res.status(201).json(savedBlog)
+  console.log('Blog saved!', savedBlog)
 })
 
-BlogsRouter.put('/:id', (req, res, next) => {
+BlogsRouter.put('/:id', async (req, res) => {
   const id = req.params.id
   const updatedData = req.body
 
@@ -66,15 +57,12 @@ BlogsRouter.put('/:id', (req, res, next) => {
     return res.status(400).json({ error: 'Content missing' })
   }
 
-  Blog.findByIdAndUpdate(id, updatedData, { new: true, runValidators: true })
-    .then(updatedBlog => {
-      if (updatedBlog) {
-        res.json(updatedBlog)
-      } else {
-        res.status(404).json({ error: 'Blog not found' })
-      }
-    })
-    .catch(err => next(err))
+  const updatedBlog = await Blog.findByIdAndUpdate(id, updatedData, { new: true, runValidators: true })
+  if (updatedBlog) {
+    res.json(updatedBlog)
+  } else {
+    res.status(404).json({ error: 'Blog not found' })
+  }
 })
 
 module.exports = BlogsRouter
