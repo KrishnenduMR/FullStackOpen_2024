@@ -10,32 +10,36 @@ const requestLogger = (request, response, next) => {
   next()
 }
 
-const tokenExtractor = (req, res, next) => {
-  const authorization = req.get('authorization');
+const getTokenFrom = request => {
+  const authorization = request.get('authorization')
   if (authorization && authorization.startsWith('Bearer ')) {
-    req.token = authorization.replace('Bearer ', '');
+    return authorization.replace('Bearer ', '')
   }
-  next();
-};
+  return null
+}
 
-const userExtractor = async (req, res, next) => {
-  if (!req.token) {
-    return res.status(401).json({ error: 'Token missing or invalid' });
-  }
+const userExtractor = async (request, response, next) => {
+  const token = getTokenFrom(request)
 
-  try {
-    const decodedToken = jwt.verify(req.token, process.env.SECRET);
-    console.log(decodedToken);
-    req.user = await User.findById(decodedToken.id);
-    if (!req.user) {
-      return res.status(401).json({ error: 'User not found' });
-    }
-  } catch (error) {
-    return res.status(401).json({ error: 'Token invalid or expired' });
+  if (!token) {
+    return response.status(401).json({ error: 'token missimg' })
   }
 
-  next();
-};
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' })
+  }
+
+  const user = await User.findById(decodedToken.id)
+
+  if (!user) {
+    return response.status(401).json({ error: 'user not found' })
+  }
+
+  request.user = user
+
+  next()
+}
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
@@ -61,6 +65,5 @@ module.exports = {
   requestLogger,
   unknownEndpoint,
   errorHandler,
-  tokenExtractor,
-  userExtractor
+  userExtractor,
 }
