@@ -1,9 +1,10 @@
 require('express-async-errors')
 const BlogsRouter = require('express').Router()
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 BlogsRouter.get('/', async (req, res) => {
-  const blogs = await Blog.find({})
+  const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
   res.json(blogs)
 })
 
@@ -29,9 +30,14 @@ BlogsRouter.delete('/:id', async (req, res) => {
 BlogsRouter.post('/', async (req, res) => {
   console.log('Received body:', req.body)
 
-  const { title, author, url, likes } = req.body
+  const { title, author, url, likes, userId } = req.body
   if (!title || !author || !url) {
     return res.status(400).json({ error: 'Content missing' })
+  }
+
+  const user = await User.findById(userId)
+  if (!user) {
+    return res.status(400).json({ error: 'User not found' })
   }
 
   if(!likes) {
@@ -43,8 +49,10 @@ BlogsRouter.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Title must be unique' })
   }
 
-  const blog = new Blog({ title, author, url, likes })
+  const blog = new Blog({ title, author, url, likes, user: user.id })
   const savedBlog = await blog.save()
+  user.blogs = user.blogs.concat(savedBlog._id)
+  await user.save()
   res.status(201).json(savedBlog)
   console.log('Blog saved!', savedBlog)
 })

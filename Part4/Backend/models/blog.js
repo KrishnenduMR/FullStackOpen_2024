@@ -26,6 +26,10 @@ const blogSchema = new mongoose.Schema({
     validator: function(v) {
       return /^[0-9]+$/.test(v)
     },
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   }
 
 })
