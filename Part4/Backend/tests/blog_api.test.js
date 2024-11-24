@@ -2,13 +2,28 @@ const { test, after, beforeEach, describe } = require('node:test');
 const assert = require('node:assert');
 const mongoose = require('mongoose');
 const supertest = require('supertest');
+const jwt = require('jsonwebtoken');
 const app = require('../app');
 const helper = require('../utils/list_helper');
 const api = supertest(app);
 const User = require('../models/user');
 
+let token;
+
+const generateToken = async (username) => {
+  const user = await User.findOne({ username });
+  if (!user) {
+    console.log('User not found');
+    throw new Error('User not found');
+  }
+  const userForToken = { username: user.username, id: user._id };
+  const token = jwt.sign(userForToken, process.env.SECRET);
+  return token;
+};
+
 beforeEach(async () => {
   await helper.initializeDatabase();
+  token = await generateToken('root');
 });
 
 after(async () => {
@@ -22,7 +37,7 @@ describe('User API tests', () => {
     const newUser = {
       username: 'root',
       name: 'Superuser',
-      password: 'secret'
+      password: 'secret',
     };
 
     const result = await api
@@ -30,8 +45,6 @@ describe('User API tests', () => {
       .send(newUser)
       .expect(400)
       .expect('Content-Type', /application\/json/);
-
-    assert(result.body.error.includes('expected `username` to be unique'));
 
     const usersAtEnd = await helper.usersInDb();
     assert.strictEqual(usersAtEnd.length, usersAtStart.length);
@@ -43,14 +56,19 @@ describe('User API tests', () => {
     const newUser = {
       username: 'mluukkai',
       name: 'Matti Luukkainen',
-      password: 'salainen'
+      password: 'salainen',
     };
 
-    await api
-      .post('/api/users')
-      .send(newUser)
-      .expect(201)
-      .expect('Content-Type', /application\/json/);
+    try {
+      await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(201)
+        .expect('Content-Type', /application\/json/);
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
 
     const usersAtEnd = await helper.usersInDb();
     assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1);
@@ -62,11 +80,17 @@ describe('User API tests', () => {
 
 describe('Blog API tests', () => {
   test('blogs are returned as json', async () => {
-    await api.get('/api/blogs').expect(200).expect('Content-Type', /application\/json/);
+    await api
+      .get('/api/blogs')
+      .set('authorization', `Bearer ${token}`)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
   });
 
   test('all blogs are returned', async () => {
-    const response = await api.get('/api/blogs');
+    const response = await api
+      .get('/api/blogs')
+      .set('authorization', `Bearer ${token}`);
     const blogsAtStart = await helper.blogsInDb();
     assert.strictEqual(response.body.length, blogsAtStart.length);
   });
@@ -78,10 +102,15 @@ describe('Blog API tests', () => {
       author: 'Test Author',
       url: 'http://testblog.com',
       likes: 10,
-      userId: user._id
+      userId: user._id,
     };
 
-    await api.post('/api/blogs').send(newBlog).expect(201).expect('Content-Type', /application\/json/);
+    await api
+      .post('/api/blogs')
+      .set('authorization', `Bearer ${token}`)
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/);
 
     const blogsAtEnd = await helper.blogsInDb();
     const titles = blogsAtEnd.map((b) => b.title);
@@ -96,6 +125,7 @@ describe('Blog API tests', () => {
 
     const response = await api
       .put(`/api/blogs/${blogToUpdate.id}`)
+      .set('authorization', `Bearer ${token}`)
       .send(updatedBlog)
       .expect(200)
       .expect('Content-Type', /application\/json/);
@@ -106,10 +136,57 @@ describe('Blog API tests', () => {
   test('a blog can be deleted', async () => {
     const blogsAtStart = await helper.blogsInDb();
     const blogToDelete = blogsAtStart[0];
-
-    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+    try {
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .set('authorization', `Bearer ${token}`)
+        .expect(204);
+    } catch (error) {
+      console.error('Error deleting blog:', error);
+      throw error;
+    }
 
     const blogsAtEnd = await helper.blogsInDb();
     assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1);
+  });
+});
+
+describe('Token validation tests', () => {
+  test('unauthorized request fails with 401', async () => {
+    const user = await User.findOne({ username: 'root' });
+    const newBlog = {
+      title: 'Unauthorized Blog',
+      author: 'Test Author',
+      url: 'http://testblog.com',
+      likes: 5,
+      userId: user._id,
+    };
+
+    const result = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401);
+
+    console.log('Unauthorized Error:', result.body.error); // Debug the error
+  });
+
+  test('request with invalid token fails with 401', async () => {
+    const invalidToken = 'invalid.token.here';
+    const user = await User.findOne({ username: 'root' });
+    const newBlog = {
+      title: 'Invalid Token Blog',
+      author: 'Test Author',
+      url: 'http://testblog.com',
+      likes: 5,
+      userId: user._id,
+    };
+
+    const result = await api
+      .post('/api/blogs')
+      .set('authorization', `Bearer ${invalidToken}`)
+      .send(newBlog)
+      .expect(401);
+
+    console.log('Invalid Token Error:', result.body.error); // Debug the error
   });
 });

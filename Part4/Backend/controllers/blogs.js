@@ -1,4 +1,5 @@
 require('express-async-errors')
+const jwt = require('jsonwebtoken')
 const BlogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
@@ -19,43 +20,41 @@ BlogsRouter.get('/:id', async (req, res) => {
 })
 
 BlogsRouter.delete('/:id', async (req, res) => {
-  const id = req.params.id
-  const deletedBlog = await Blog.findByIdAndDelete(id)
-  if (!deletedBlog) {
-    return res.status(404).json({ error: 'Blog not found' })
+  const blog = await Blog.findById(req.params.id);
+  if (!blog) {
+    return res.status(404).json({ error: 'Blog not found' });
   }
-  res.status(204).json({ message: 'Blog deleted', deletedBlog })
-})
+  if (blog.user.toString() !== req.user.id.toString()) {
+    return res.status(403).json({ error: 'Unauthorized to delete this blog' });
+  }
+
+  await Blog.findByIdAndDelete(req.params.id);
+  res.status(204).end();
+});
+
 
 BlogsRouter.post('/', async (req, res) => {
-  console.log('Received body:', req.body)
+  if (!req.user) {
+    return res.status(401).json({ error: 'User not authenticated' });
+  }
 
-  const { title, author, url, likes, userId } = req.body
+  const { title, author, url, likes } = req.body;
   if (!title || !author || !url) {
-    return res.status(400).json({ error: 'Content missing' })
+    return res.status(400).json({ error: 'Content missing' });
   }
 
-  const user = await User.findById(userId)
-  if (!user) {
-    return res.status(400).json({ error: 'User not found' })
-  }
-
-  if(!likes) {
-    req.body.likes = 0
-  }
-
-  const existingBlog = await Blog.findOne({ title })
+  const existingBlog = await Blog.findOne({ title });
   if (existingBlog) {
-    return res.status(400).json({ error: 'Title must be unique' })
+    return res.status(400).json({ error: 'Title must be unique' });
   }
 
-  const blog = new Blog({ title, author, url, likes, user: user.id })
-  const savedBlog = await blog.save()
-  user.blogs = user.blogs.concat(savedBlog._id)
-  await user.save()
-  res.status(201).json(savedBlog)
-  console.log('Blog saved!', savedBlog)
-})
+  const blog = new Blog({ title, author, url, likes, user: req.user._id });
+  const savedBlog = await blog.save();
+  req.user.blogs = req.user.blogs.concat(savedBlog._id);
+  await req.user.save();
+  res.status(201).json(savedBlog);
+});
+
 
 BlogsRouter.put('/:id', async (req, res) => {
   const id = req.params.id
