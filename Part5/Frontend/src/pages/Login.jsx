@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Form as BootstrapForm, Button, Container } from "react-bootstrap";
 import AuthCalls from "../api/AuthCalls";
@@ -12,10 +12,6 @@ const Login = () => {
 
         setError(null); // Reset error state on each submit
         setSuccess(null); // Reset success state on each submit
-
-    const handleChange = (event) => {
-            setFormContent({ ...formContent, [event.target.name]: event.target.value });
-        };
 
         try {
             console.log("Logging in");

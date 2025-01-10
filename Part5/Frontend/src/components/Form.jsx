@@ -1,5 +1,5 @@
-import React from "react";
 import { Form as BootstrapForm, Button, Container } from "react-bootstrap";
+import PropTypes from 'prop-types';
 
 const Form = ({ formContent, handleChange, handleSubmit, handleUpdate }) => {
     const { id, title, author, url, likes } = formContent || {};
@@ -63,5 +63,18 @@ const Form = ({ formContent, handleChange, handleSubmit, handleUpdate }) => {
         </Container>
     );
 };
+Form.propTypes = {
+    formContent: PropTypes.shape({
+        id: PropTypes.string,
+        title: PropTypes.string,
+        author: PropTypes.string,
+        url: PropTypes.string,
+        likes: PropTypes.number,
+    }),
+    handleChange: PropTypes.func.isRequired,
+    handleSubmit: PropTypes.func.isRequired,
+    handleUpdate: PropTypes.func.isRequired,
+};
 
 export default Form;
+

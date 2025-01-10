@@ -1,8 +1,8 @@
-import React from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import PropTypes from 'prop-types';
 
-function Home({ logout, isAuthenticated, token }) { 
+function Home({ logout, isAuthenticated }) { 
     return (
         <Container>
             <Row>
@@ -18,6 +18,11 @@ function Home({ logout, isAuthenticated, token }) {
         </Container>
     );
 }
+Home.propTypes = {
+    logout: PropTypes.func.isRequired,
+    isAuthenticated: PropTypes.bool.isRequired,
+};
 
 export default Home;
+
     

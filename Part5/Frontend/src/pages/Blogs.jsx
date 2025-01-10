@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import PropTypes from 'prop-types';
 import BlogListCalls from "../api/BlogListCalls";
 import Loading from "../components/Loading";
 import List from "../components/List";
 import Form from "../components/Form";
+import Filter from "../components/Filter";
+import ToggleComp from "../components/ToggleComp";
 import { Button } from "react-bootstrap";
 
-function BlogList({token}) {
+function Blogs({token}) {
     const [blogs, setBlogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
     const [formContent, setFormContent] = useState({});
-    const [list, setList] = useState(false);
     const [form, setForm] = useState(false);
-    
-    
+    const [filter, setFilter] = useState("");
+    const BlogListRef = useRef()
+    const FilterRef = useRef()
+        
     const buttonStyle = {
         margin: "20px",
         display: "block",
@@ -26,7 +30,7 @@ function BlogList({token}) {
             setBlogs(initial);
             setLoading(false);
         });
-    }, []);
+    }, [token]);
 
     //handle like button
     const handleLike = async (blog) => {
@@ -86,6 +90,7 @@ function BlogList({token}) {
             resetMessages(); // Reset success/error messages
         }
         setFormContent({}); // Reset form after update
+        setForm(false); // Close form after update
     };
 
     // Handle form input change
@@ -94,7 +99,7 @@ function BlogList({token}) {
     };
 
     const handleSubmit = async (formContent) => {
-        setForm(false);
+        setForm(false); // Close form after submission
         if (!formContent.title || !formContent.url) {
             setError("Title and URL are required"); // Validate form input
             return;
@@ -131,14 +136,18 @@ function BlogList({token}) {
             {error && <div className="alert danger">{error}</div>} {/* Display error message */}
             {success && <div className="alert success">{success}</div>} {/* Display success message */}
             {/* Render List component */}
-            <Button style={buttonStyle} onClick={() => setList(!list)}>{list ? "Hide" : "Show"} list</Button>
-            {list && <List
+            <ToggleComp style={buttonStyle} buttonLabel='show Blogs' ref={BlogListRef} >
+            <Filter setFilter={setFilter} filter={filter} ref={FilterRef} />
+            <List
                 blogs={blogs}
                 handleDelete={handleDelete}
                 setFormContent={setFormContent}
                 handleLike={handleLike}
                 token={token}
-            />} 
+                Nfilter={filter}
+                setForm={setForm}
+            />
+            </ToggleComp> 
 
             {/* Render Form component */}
             <Button style={buttonStyle} onClick={() => setForm(!form)}>add blogs</Button>
@@ -151,5 +160,8 @@ function BlogList({token}) {
         </div>
     );
 }
+Blogs.propTypes = {
+    token: PropTypes.string.isRequired,
+};
 
-export default BlogList;
+export default Blogs;

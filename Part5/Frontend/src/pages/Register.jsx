@@ -1,5 +1,4 @@
-import React from "react";
-import { Form as BootstrapForm, Button, Container } from "react-bootstrap";
+import React,{ Form as BootstrapForm, Button, Container } from "react-bootstrap";
 import AuthCalls from "../api/AuthCalls";
 
 const Register = () => {

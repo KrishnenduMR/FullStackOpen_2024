@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useEffect } from "react"
+import  { lazy, Suspense, useState, useEffect } from "react"
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom"
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Button } from 'react-bootstrap';
@@ -23,13 +23,13 @@ function App() {
 };
   useEffect(() => {
     setIsAuthenticated(!!token);
-  }, []);
+  } , [token]);
 
   return (
     <Suspense fallback={<Loading />}>
       <Router>
         {/* navbar */}
-        <Button onClick={home} style={{ margin: 20 }}> Home </Button>
+        <Button onClick={home} style={{ margin: 20, width:120 }}> Home </Button>
         <Routes>
           <Route path="/" element={<Home logout={logout} isAuthenticated={isAuthenticated} token={token}/>} />
           <Route path="/blogs" element={isAuthenticated ? <Blogs token={token} /> : <Login />} />

@@ -1,16 +1,22 @@
-import React from "react";
 import { useEffect, useState } from "react";
 import { Table, Button } from "react-bootstrap";
-import AuthCalls from "../api/AuthCalls"
+import AuthCalls from "../api/AuthCalls";
+import PropTypes from 'prop-types';
 
-const List = ({ blogs = [], handleDelete, setFormContent, handleLike, token}) => {
+const List = ({ blogs = [], handleDelete, setFormContent, handleLike, token, Nfilter, setForm}) => {
     const [user, setUser] = useState("");
     useEffect(() => {
             AuthCalls.getUser(token).then((response) => {
             setUser(response);
         });
-    }, []);
+    }, [token]);
 
+    const ButtonUpdate = (item) => {
+        return () => {
+            setFormContent(item);
+            setForm(true);
+        }
+    }
     return (
         <Table striped bordered hover>
             <thead>
@@ -24,7 +30,8 @@ const List = ({ blogs = [], handleDelete, setFormContent, handleLike, token}) =>
                 </tr>
             </thead>
             <tbody>
-                {blogs.map((item) => (
+                {blogs.filter(item => Nfilter !== '' ? item.title.toLowerCase().includes(Nfilter.toLowerCase()) ||
+                item.author.toLowerCase().includes(Nfilter.toLowerCase()) : true).map((item) => ( 
                     <tr key={item.id}>
                         <td>{item.title}</td>
                         <td>{item.author}</td>
@@ -40,7 +47,7 @@ const List = ({ blogs = [], handleDelete, setFormContent, handleLike, token}) =>
                             </Button>}
                             {user === item.user.username && <Button
                                 variant="warning"
-                                onClick={() => setFormContent(item)}
+                                onClick={ButtonUpdate(item)}
                                 className="ms-2"
                             >
                                 Update
@@ -57,6 +64,16 @@ const List = ({ blogs = [], handleDelete, setFormContent, handleLike, token}) =>
             </tbody>
         </Table>
     );
+};
+
+List.propTypes = {
+    blogs: PropTypes.array.isRequired,
+    handleDelete: PropTypes.func.isRequired,
+    setFormContent: PropTypes.func.isRequired,
+    handleLike: PropTypes.func.isRequired,
+    token: PropTypes.string.isRequired,
+    Nfilter: PropTypes.string.isRequired,
+    setForm: PropTypes.func.isRequired,
 };
 
 export default List;
