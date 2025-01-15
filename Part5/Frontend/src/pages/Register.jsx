@@ -1,4 +1,5 @@
-import React,{ Form as BootstrapForm, Button, Container } from "react-bootstrap";
+import React from "react";
+import { Form, Button, Container } from "react-bootstrap";
 import AuthCalls from "../api/AuthCalls";
 
 const Register = () => {
@@ -57,21 +58,21 @@ const Register = () => {
             {error && <div className="alert alert-danger">{error}</div>}
             {success && <div className="alert alert-success">{success}</div>}
             <Container>
-                <BootstrapForm onSubmit={handleSubmit}>
-                    <BootstrapForm.Group>
-                        <BootstrapForm.Label>Username</BootstrapForm.Label>
-                        <BootstrapForm.Control type="text" name="username" required />
-                    </BootstrapForm.Group>
-                    <BootstrapForm.Group>
-                        <BootstrapForm.Label>Name</BootstrapForm.Label>
-                        <BootstrapForm.Control type="text" name="name" required />
-                    </BootstrapForm.Group>
-                    <BootstrapForm.Group>
-                        <BootstrapForm.Label>Password</BootstrapForm.Label>
-                        <BootstrapForm.Control type="password" name="password" required />
-                    </BootstrapForm.Group>
+                <Form onSubmit={handleSubmit}>
+                    <Form.Group>
+                        <Form.Label>Username</Form.Label>
+                        <Form.Control type="text" name="username" required />
+                    </Form.Group>
+                    <Form.Group>
+                        <Form.Label>Name</Form.Label>
+                        <Form.Control type="text" name="name" required />
+                    </Form.Group>
+                    <Form.Group>
+                        <Form.Label>Password</Form.Label>
+                        <Form.Control type="password" name="password" required />
+                    </Form.Group>
                     <Button type="submit">Register</Button>
-                </BootstrapForm>
+                </Form>
             </Container>
         </div>
     );

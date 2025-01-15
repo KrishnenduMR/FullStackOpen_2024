@@ -20,6 +20,7 @@ const Form = ({ formContent, handleChange, handleSubmit, handleUpdate }) => {
                     <BootstrapForm.Label>Title</BootstrapForm.Label>
                     <BootstrapForm.Control
                         type="text"
+                        data-testid='title'
                         value={title || ""}
                         onChange={handleChange}
                         name="title"
@@ -33,6 +34,7 @@ const Form = ({ formContent, handleChange, handleSubmit, handleUpdate }) => {
                         value={author || ""}
                         onChange={handleChange}
                         name="author"
+                        data-testid='author'
                     />
                 </BootstrapForm.Group>
 
@@ -43,6 +45,7 @@ const Form = ({ formContent, handleChange, handleSubmit, handleUpdate }) => {
                         value={url || ""}
                         onChange={handleChange}
                         name="url"
+                        data-testid='url'
                     />
                 </BootstrapForm.Group>
 

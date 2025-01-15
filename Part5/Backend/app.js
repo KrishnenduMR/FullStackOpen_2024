@@ -28,12 +28,13 @@ app.use(cors())
 app.use(express.static('dist'))
 app.use(express.json())
 app.use(middleware.requestLogger)
-app.use(middleware.errorHandler)
+
 app.use('/api/auth/register', usersRouter)
 app.use('/api/auth/user', getUserRouter)
 app.use('/api/auth/login', loginRouter)
 app.use('/api/blogs', BlogsRouter)
 
+app.use(middleware.errorHandler)
 app.use(middleware.unknownEndpoint)
 
 module.exports = app
